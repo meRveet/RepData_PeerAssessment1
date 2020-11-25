@@ -5,21 +5,134 @@ output:
     keep_md: true
 ---
 
-
 ## Loading and preprocessing the data
-
-
+### Exploring the dataset
+Unzipping of file, reading and exploring data.
+```{r setup, echo=T}
+unzip("activity.zip")
+act<-read.csv("activity.csv")
+summary(act)
+names(act)
+head(act)
+```
+### Converting act$date to Date format and generating pairs.
+```{r}
+act$date<- as.Date(act$date)
+summary(act)
+pairs(act)
+```
 
 ## What is mean total number of steps taken per day?
+### Summarising data to sum the steps in each day and storing in stepsday.
+```{r echo=T, message=FALSE, warning=FALSE}
+library(dplyr)
+library(magrittr)
+stepsday<- act %>% group_by(date) %>% summarise_each(funs(sum)) 
+names(stepsday)<- c("date", "total.steps", "intervals")
+str(stepsday)
+```
+### Plotting Chart
+```{r echo=T, message=FALSE, warning=FALSE}
+library(ggplot2)
+g<- ggplot(stepsday, aes( y=total.steps, x=date)) + 
+    geom_bar(stat = "identity") + 
+    ylab("Total Steps") +
+    xlab("Date") +
+    ggtitle("Total Steps by Date")+
+    theme_bw()
+  
+g
+```
 
-
-
+### Mean and Median
+```{r, echo=T}
+summary(stepsday)
+```
 ## What is the average daily activity pattern?
+### Plotting time series for average daily pattern and searching for maximum steps
+```{r}
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+stepsint<- act %>% 
+    select(steps, interval)%>% 
+    group_by(interval) %>% 
+    summarise_each(funs(mean(., na.rm=T)))
+    str(stepsint)
+g<-ggplot(stepsint, aes(interval, steps)) + 
+    geom_line(col="red") + 
+    ggtitle("Average number of steps per time interval across all days") +
+    xlab("Time") + ylab("Steps")
+g
 
-
+stepsint %>% 
+    select(steps, interval) %>%
+    filter(steps==max(stepsint$steps))
+```
 
 ## Imputing missing values
+```{r}
+print(c("Total counts of missing data: ", sum(is.na(act$steps))))
+```
+
+Missing values were replaced by matching the mean steps obtained at each intervals across all days. The data is then imputed into the individual intervals with missing data. Summary is printed to show that no NA values are found in steps varible. 
+
+```{r}
+act$nonasteps<- ifelse(is.na(act$steps), round(stepsint$steps[match(act$interval,stepsint$interval)],0),act$steps)
+newact<- select(act, interval, date, nonasteps)
+summary(newact)
+```
+### Histogram for Imputed Steps Data
+```{r}
+library(ggplot2)
+g<- ggplot(newact, aes( y=nonasteps, x=date)) + 
+    geom_bar(stat = "identity") + 
+    ylab("Total Steps") +
+    xlab("Date") +
+    ggtitle("Total Steps by Date")+
+    theme_bw()
+  
+g
+```
+
+### Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+The difference as observed below with no changed in mean and median had dropped by median of 3 steps. As mean data was used, it doesn't not have great impact on the mean data. However, it does skew the median by a few steps. 
+
+```{r}
+library(dplyr)
+library(magrittr)
+newactday<- newact %>% group_by(date) %>% summarise_each(funs(sum)) 
+names(newactday)<- c("date", "intervals", "total.steps")
+str(newactday)
+summary(newactday)
+summary(stepsday)
+```
 
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+As observed in the line chart below, there were more steps on weekdays. 
+
+```{r}
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+
+newact$date<- as.Date(newact$date)
+newact$day<- ifelse(weekdays(newact$date) %in% c("Monday","Tuesday","Wednesday","Thursday","Friday") == T, "weekday", "weekend")
+
+
+newact$day<- as.factor(newact$day)
+grouped<- newact %>% select(day,nonasteps,interval) %>% group_by(day, interval) %>% summarise_each(funs (sum))
+
+g<- ggplot(grouped, aes(interval,nonasteps)) +
+  geom_line(col="red")+
+  ggtitle("Aveerage steps per interval: Weekdays vs Weekends")+
+  xlab("Steps")+ ylab("Time Intervals") + facet_grid(day~.)
+g
+
+str(newactday)
+```
+
