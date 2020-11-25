@@ -126,13 +126,14 @@ newact$day<- ifelse(weekdays(newact$date) %in% c("Monday","Tuesday","Wednesday",
 
 newact$day<- as.factor(newact$day)
 grouped<- newact %>% select(day,nonasteps,interval) %>% group_by(day, interval) %>% summarise_each(funs (sum))
+str(newactday)
 
 g<- ggplot(grouped, aes(interval,nonasteps)) +
   geom_line(col="red")+
-  ggtitle("Aveerage steps per interval: Weekdays vs Weekends")+
+  ggtitle("Average steps per interval: Weekdays vs Weekends")+
   xlab("Steps")+ ylab("Time Intervals") + facet_grid(day~.)
 g
 
-str(newactday)
+
 ```
 
