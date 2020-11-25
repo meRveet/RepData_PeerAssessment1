@@ -129,9 +129,10 @@ grouped<- newact %>% select(day,nonasteps,interval) %>% group_by(day, interval) 
 str(newactday)
 
 g<- ggplot(grouped, aes(interval,nonasteps)) +
-  geom_line(col="red")+
-  ggtitle("Average steps per interval: Weekdays vs Weekends")+
-  xlab("Steps")+ ylab("Time Intervals") + facet_grid(day~.)
+  geom_line(col = "red") +
+  ggtitle("Average steps per interval: Weekdays vs Weekends") +
+  xlab("Steps") + ylab("Time Intervals") + facet_grid(day ~ .)
+
 g
 
 
