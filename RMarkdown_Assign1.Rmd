@@ -1,0 +1,75 @@
+---
+title: "RepData Assignment 1"
+author: "MT"
+date: "11/25/2020"
+output: html_document
+---
+## Exploring the dataset
+Unzipping of file, reading and exploring data.
+```{r setup, echo=T}
+unzip("activity.zip")
+act<-read.csv("activity.csv")
+summary(act)
+names(act)
+head(act)
+```
+
+Converting act$date to Date format and generating pairs.
+```{r}
+act$date<- as.Date(act$date)
+summary(act)
+pairs(act)
+```
+
+Summarising data to sum the steps in each day and storing in stepsday.
+```{r echo=T, message=FALSE, warning=FALSE}
+library(dplyr)
+library(magrittr)
+stepsday<- act %>% group_by(date) %>% summarise_each(funs(sum)) 
+names(stepsday)<- c("date", "total.steps", "intervals")
+str(stepsday)
+```
+
+## What is mean total number of steps taken a day?
+### Total number of steps per day
+```{r echo=T, message=FALSE, warning=FALSE}
+library(ggplot2)
+g<- ggplot(stepsday, aes( y=total.steps, x=date)) + 
+    geom_bar(stat = "identity") + 
+    ylab("Total Steps") +
+    xlab("Date") +
+    ggtitle("Total Steps by Date")
+  
+g
+```
+
+### Calculating the mean and median of steps taken per day.
+```{r, echo=T}
+summary(stepsday)
+```
+
+## What is the average daily activity pattern?
+### Plotting time series for average daily pattern and searching for maximum steps
+```{r}
+library(dplyr)
+library(magrittr)
+library(ggplot2)
+stepsint<- act %>% 
+    select(steps, interval)%>% 
+    group_by(interval) %>% 
+    summarise_each(funs(mean(., na.rm=T)))
+    str(stepsint)
+g<-ggplot(stepsint, aes(interval, steps)) + 
+    geom_line(col="red") + 
+    ggtitle("Average number of steps per time interval across all days") +
+    xlab("Time") + ylab("Steps")
+g
+
+stepsint %>% 
+    select(steps, interval) %>%
+    filter(steps==max(stepsint$steps))
+```
+## Imputing Missing Values
+
+
+
