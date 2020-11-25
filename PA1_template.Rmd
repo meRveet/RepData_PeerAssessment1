@@ -125,7 +125,7 @@ newact$day<- ifelse(weekdays(newact$date) %in% c("Monday","Tuesday","Wednesday",
 
 
 newact$day<- as.factor(newact$day)
-grouped<- newact %>% select(day,nonasteps,interval) %>% group_by(day, interval) %>% summarise_each(funs (sum))
+grouped<- newact %>% select(day,nonasteps,interval) %>% group_by(day, interval) %>% summarise_each(funs (mean))
 str(newactday)
 
 g<- ggplot(grouped, aes(interval,nonasteps)) +
