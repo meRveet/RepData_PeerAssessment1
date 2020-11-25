@@ -131,7 +131,7 @@ str(newactday)
 g<- ggplot(grouped, aes(interval,nonasteps)) +
   geom_line(col = "red") +
   ggtitle("Average steps per interval: Weekdays vs Weekends") +
-  xlab("Steps") + ylab("Time Intervals") + facet_grid(day ~ .)
+  xlab("Time Intervals") + ylab("Steps") + facet_grid(day ~ .)
 
 g
 
